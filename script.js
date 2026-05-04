@@ -81,6 +81,24 @@ const inputClosePin = document.querySelector('.form__input--pin');
 /////////////////////////////////////////////////
 // Functions
 
+const formatMovementDate = function (date, locale) {
+  const calcDaysPassed = (date1, date2) =>
+    Math.round(Math.abs(date1 - date2) / (1000 * 60 * 60 * 24));
+  const daysPassed = calcDaysPassed(new Date(), date);
+  const options = {
+    hour: 'numeric',
+    minute: 'numeric',
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric',
+    // weekday: 'long',
+  };
+  if (daysPassed == 0) return 'Today';
+  else if (daysPassed == 1) return 'Yesterday';
+  else if (daysPassed <= 7) return `${daysPassed} days ago`;
+  return new Intl.DateTimeFormat(locale, options).format(date);
+};
+
 // Login
 const createUsernames = function (accs) {
   accs.forEach(function (acc) {
@@ -112,17 +130,11 @@ const displayMovements = function (acc, sort = false) {
     movement: mov,
     movementDate: acc.movementsDates.at(i),
   }));
-  console.log(combinedMovsDates);
 
   if (sort) combinedMovsDates.sort((a, b) => a.movement - b.movement);
 
-  // const movs = sort
-  //   ? acc.movements.slice().sort((a, b) => a - b)
-  //   : acc.movements;
-
   combinedMovsDates.forEach(function (obj, i) {
     const { movement, movementDate } = obj;
-    console.log(obj);
     const type = movement > 0 ? 'deposit' : 'withdrawal';
 
     const displayDate = new Date(movementDate);
@@ -132,7 +144,7 @@ const displayMovements = function (acc, sort = false) {
         <div class="movements__type movements__type--${type}">${
           i + 1
         } ${type}</div>
-        <div class="movements__date">${displayDate.toLocaleString()}</div>
+        <div class="movements__date">${formatMovementDate(displayDate, acc.locale)}</div>
         <div class="movements__value">${movement.toFixed(2)}€</div>
       </div>
     `;
@@ -184,26 +196,36 @@ btnLogin.addEventListener('click', function (e) {
   // Prevent form from submitting
   e.preventDefault();
 
-  // Locate the current account that has the input username
   currentAccount = accounts.find(
     acc => acc.username === inputLoginUsername.value,
   );
   console.log(currentAccount);
 
-  // Check if username matches a existing account
   if (currentAccount?.pin === +inputLoginPin.value) {
     // Display UI and message
     labelWelcome.textContent = `Welcome back, ${
       currentAccount.owner.split(' ')[0]
     }`;
+
+    // Diplay current date
+    const dateOptions = {
+      hour: 'numeric',
+      minute: 'numeric',
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+      // weekday: 'long',
+    };
+    labelDate.textContent = new Intl.DateTimeFormat(
+      currentAccount.locale,
+      dateOptions,
+    ).format(new Date());
+
     containerApp.style.opacity = 100;
 
     // Clear input fields
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
-
-    // Diplay current date
-    labelDate.textContent = new Date().toLocaleString();
 
     // Update UI
     updateUI(currentAccount);
