@@ -108,14 +108,24 @@ const updateUI = function (acc) {
 const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = '';
 
-  const movs = sort
-    ? acc.movements.slice().sort((a, b) => a - b)
-    : acc.movements;
+  const combinedMovsDates = acc.movements.map((mov, i) => ({
+    movement: mov,
+    movementDate: acc.movementsDates.at(i),
+  }));
+  console.log(combinedMovsDates);
 
-  movs.forEach(function (mov, i) {
-    const type = mov > 0 ? 'deposit' : 'withdrawal';
+  if (sort) combinedMovsDates.sort((a, b) => a.movement - b.movement);
 
-    const displayDate = new Date(acc.movementsDates[i]);
+  // const movs = sort
+  //   ? acc.movements.slice().sort((a, b) => a - b)
+  //   : acc.movements;
+
+  combinedMovsDates.forEach(function (obj, i) {
+    const { movement, movementDate } = obj;
+    console.log(obj);
+    const type = movement > 0 ? 'deposit' : 'withdrawal';
+
+    const displayDate = new Date(movementDate);
 
     const html = `
       <div class="movements__row">
@@ -123,7 +133,7 @@ const displayMovements = function (acc, sort = false) {
           i + 1
         } ${type}</div>
         <div class="movements__date">${displayDate.toLocaleString()}</div>
-        <div class="movements__value">${mov.toFixed(2)}€</div>
+        <div class="movements__value">${movement.toFixed(2)}€</div>
       </div>
     `;
 
