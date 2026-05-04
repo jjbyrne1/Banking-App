@@ -47,6 +47,7 @@ const accounts = [account1, account2];
 
 /////////////////////////////////////////////////
 // Elements
+
 const labelWelcome = document.querySelector('.welcome');
 const labelDate = document.querySelector('.date');
 const labelBalance = document.querySelector('.balance__value');
@@ -169,9 +170,6 @@ const createUsernames = function (accs) {
 };
 createUsernames(accounts);
 
-inputLoginUsername.value = account1.username;
-inputLoginPin.value = account1.pin;
-
 const updateUI = function (acc) {
   // Display movements
   displayMovements(acc);
@@ -208,11 +206,6 @@ const startLogoutTimer = function () {
 ///////////////////////////////////////
 // Event handlers
 let currentAccount, timer;
-
-// set default account avoid repetition while developing
-currentAccount = account1;
-updateUI(account1);
-containerApp.style.opacity = 100;
 
 const now = new Date();
 const day = `${now.getDate()}`.padStart(2, 0);
@@ -330,8 +323,6 @@ btnClose.addEventListener('click', function (e) {
       const index = accounts.findIndex(
         acc => acc.username === currentAccount.username,
       );
-      console.log(index);
-      // .indexOf(23)
 
       // Delete account
       accounts.splice(index, 1);
