@@ -93,13 +93,82 @@ const createUsernames = function (accs) {
 };
 createUsernames(accounts);
 
-// set default username and password to avoid repetition
-inputLoginUsername.value = account1.username;
-inputLoginPin.value = account1.pin;
+// Load/Update UI
+const updateUI = function (acc) {
+  // Display movements
+  displayMovements(acc);
+
+  // Display balance
+  calcDisplayBalance(acc);
+
+  // Display summary
+  calcDisplaySummary(acc);
+};
+
+const displayMovements = function (acc, sort = false) {
+  containerMovements.innerHTML = '';
+
+  const movs = sort
+    ? acc.movements.slice().sort((a, b) => a - b)
+    : acc.movements;
+
+  movs.forEach(function (mov, i) {
+    const type = mov > 0 ? 'deposit' : 'withdrawal';
+
+    const displayDate = new Date(acc.movementsDates[i]);
+
+    const html = `
+      <div class="movements__row">
+        <div class="movements__type movements__type--${type}">${
+          i + 1
+        } ${type}</div>
+        <div class="movements__date">${displayDate.toLocaleString()}</div>
+        <div class="movements__value">${mov.toFixed(2)}€</div>
+      </div>
+    `;
+
+    containerMovements.insertAdjacentHTML('afterbegin', html);
+  });
+};
+
+const calcDisplayBalance = function (acc) {
+  acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
+  labelBalance.textContent = `${acc.balance.toFixed(2)}€`;
+};
+
+const calcDisplaySummary = function (acc) {
+  const incomes = acc.movements
+    .filter(mov => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumIn.textContent = `${incomes}€`;
+
+  const out = acc.movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumOut.textContent = `${Math.abs(out).toFixed(2)}€`;
+
+  const interest = acc.movements
+    .filter(mov => mov > 0)
+    .map(deposit => (deposit * acc.interestRate) / 100)
+    .filter((int, i, arr) => {
+      // console.log(arr);
+      return int >= 1;
+    })
+    .reduce((acc, int) => acc + int, 0);
+  labelSumInterest.textContent = `${interest.toFixed(2)}€`;
+};
 
 ///////////////////////////////////////
 // Event handlers
 let currentAccount;
+
+// set default account avoid repetition while developing
+inputLoginUsername.value = account1.username;
+inputLoginPin.value = account1.pin;
+
+currentAccount = account1;
+updateUI(account1);
+containerApp.style.opacity = 100;
 
 btnLogin.addEventListener('click', function (e) {
   // Prevent form from submitting
@@ -122,5 +191,11 @@ btnLogin.addEventListener('click', function (e) {
     // Clear input fields
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
+
+    // Diplay current date
+    labelDate.textContent = new Date().toLocaleString();
+
+    // Update UI
+    updateUI(currentAccount);
   }
 });
