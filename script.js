@@ -199,3 +199,11 @@ btnLogin.addEventListener('click', function (e) {
     updateUI(currentAccount);
   }
 });
+
+// Sorting current account movements
+let sorted = false;
+btnSort.addEventListener('click', function (e) {
+  e.preventDefault();
+  displayMovements(currentAccount, !sorted);
+  sorted = !sorted;
+});
